@@ -32,18 +32,20 @@ public class DebtSimplificationService {
 
     private final ExpenseRepository expenseRepository;
     private final DebtSettlementRepository settlementRepository;
+    private final RoundUpService roundUpService;
 
     public DebtSimplificationService(ExpenseRepository expenseRepository,
-                                     DebtSettlementRepository settlementRepository) {
+                                     DebtSettlementRepository settlementRepository,
+                                     RoundUpService roundUpService) {
         this.expenseRepository = expenseRepository;
         this.settlementRepository = settlementRepository;
+        this.roundUpService = roundUpService;
     }
 
     public DebtOverview getOverview(String groupId, List<String> members) {
         List<DebtSettlement> allSettlements = settlementRepository.findByGroupIdOrderBySettledAtDesc(groupId);
         OpenPeriod open = findOpenPeriod(groupId, allSettlements);
 
-        // Start every member at 0 so people with no debts still appear in the graph.
         Map<String, BigDecimal> balances = new TreeMap<>();
         for (String member : members) {
             balances.put(member, BigDecimal.ZERO.setScale(2));
@@ -55,8 +57,6 @@ public class DebtSimplificationService {
             memberBalances.add(new MemberBalance(e.getKey(), e.getValue()));
         }
 
-        // Before: the direct debts created by the unsettled expenses.
-        // After: the fewest payments still needed, counting payments already made.
         List<DebtEdge> before = DebtSimplifier.pairwiseDebts(open.expenseDebts);
         List<DebtEdge> after = DebtSimplifier.simplify(balances);
         int saved = Math.max(0, before.size() - (open.settlements.size() + after.size()));
@@ -64,7 +64,6 @@ public class DebtSimplificationService {
         return new DebtOverview(memberBalances, before, after, allSettlements, open.expenses.size(), saved);
     }
 
-    // Records that one member paid another. The amount cannot be more than is owed.
     @Transactional
     public DebtSettlement recordPayment(String groupId, String fromUserId, String toUserId,
                                         BigDecimal amount, String recordedByUserId) {
@@ -96,7 +95,6 @@ public class DebtSimplificationService {
         return saveSettlement(groupId, fromUserId, toUserId, payment, recordedByUserId);
     }
 
-    // Records every suggested payment at once, leaving all balances at zero.
     @Transactional
     public int settleAll(String groupId, List<String> members, String recordedByUserId) {
         List<DebtEdge> payments = getOverview(groupId, members).getSimplifiedPayments();
@@ -106,7 +104,7 @@ public class DebtSimplificationService {
         return payments.size();
     }
 
-    // Saves one payment.
+    // Saves the payment, then lets Feature 3 round it up into the payer's savings.
     private DebtSettlement saveSettlement(String groupId, String fromUserId, String toUserId,
                                           BigDecimal amount, String recordedByUserId) {
         DebtSettlement settlement = new DebtSettlement();
@@ -116,19 +114,16 @@ public class DebtSimplificationService {
         settlement.setAmount(amount);
         settlement.setRecordedByUserId(recordedByUserId);
         settlement.setSettledAt(LocalDateTime.now());
-        return settlementRepository.save(settlement);
+        DebtSettlement saved = settlementRepository.save(settlement);
+        roundUpService.applyToSettlement(saved);
+        return saved;
     }
 
-    // ---------- Helpers ----------
-
-    // The expenses and payments since the group was last fully settled up.
     private static class OpenPeriod {
         final List<Expense> expenses = new ArrayList<>();
         final List<DebtSettlement> settlements = new ArrayList<>();
         final List<DebtEdge> expenseDebts = new ArrayList<>();
 
-        // Expense debts plus payments. A payment from A to B cancels debt,
-        // which is the same as B owing A that amount.
         List<DebtEdge> allDebts() {
             List<DebtEdge> all = new ArrayList<>(expenseDebts);
             for (DebtSettlement s : settlements) {
@@ -138,8 +133,6 @@ public class DebtSimplificationService {
         }
     }
 
-    // Replays the ledger in time order. Every time all balances return to zero
-    // the group is settled up, and anything before that moment is history.
     private OpenPeriod findOpenPeriod(String groupId, List<DebtSettlement> allSettlements) {
         List<Object> events = new ArrayList<>();
         events.addAll(debtExpenses(groupId));
@@ -163,7 +156,7 @@ public class DebtSimplificationService {
                 }
             }
             if (everyoneAtZero) {
-                open = new OpenPeriod(); // settled up: start a fresh period
+                open = new OpenPeriod();
             }
         }
         return open;
@@ -176,9 +169,6 @@ public class DebtSimplificationService {
         return time != null ? time : LocalDateTime.MIN;
     }
 
-    // Expenses whose splits mean "this member owes the payer".
-    // Emergency expenses are skipped: their splits are contributions members
-    // have already paid into the fund, not money still owed.
     private List<Expense> debtExpenses(String groupId) {
         List<Expense> result = new ArrayList<>();
         for (Expense e : expenseRepository.findByGroupId(groupId)) {
@@ -191,13 +181,12 @@ public class DebtSimplificationService {
         return result;
     }
 
-    // One "X owes the payer" arrow for each member's share of an expense.
     private List<DebtEdge> debtsOf(Expense e) {
         List<DebtEdge> debts = new ArrayList<>();
         String payer = e.getPaidByUserId();
         for (Map.Entry<String, Double> split : e.getSplits().entrySet()) {
             if (split.getValue() == null || split.getKey().equals(payer)) {
-                continue; // the payer does not owe themselves
+                continue;
             }
             BigDecimal owed = BigDecimal.valueOf(split.getValue()).setScale(2, RoundingMode.HALF_UP);
             if (owed.signum() > 0) {

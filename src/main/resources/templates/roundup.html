@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chipin — Round-up</title>
+    <link rel="stylesheet" th:href="@{/css/chipin-ui.css}">
+    <link rel="stylesheet" th:href="@{/css/theme-fun.css}">
+    <link rel="stylesheet" th:href="@{/css/roundup.css}">
+</head>
+<body>
+<div class="container">
+    <header class="appbar">
+        <a class="brand" th:href="@{/debts(currentUser=${currentUser})}">Chipin</a>
+        <nav class="tabs" aria-label="Chipin features">
+            <a th:href="@{/debts(currentUser=${currentUser})}" class="tab">Debts</a>
+            <a th:href="@{/bills(currentUser=${currentUser})}" class="tab">Itemized bills</a>
+            <a th:href="@{/roundup(currentUser=${currentUser})}" class="tab active">Round-up</a>
+            <a th:href="@{/assets(currentUser=${currentUser})}" class="tab">Shared assets</a>
+            <details class="more">
+                <summary class="tab">Team features</summary>
+                <div class="more-menu">
+                    <a th:href="@{/voting(currentUser=${currentUser})}">Expense voting</a>
+                    <a th:href="@{/emergency(currentUser=${currentUser})}">Emergency fund</a>
+                    <a th:href="@{/health-score(currentUser=${currentUser})}">Health score</a>
+                    <a th:href="@{/recurring(currentUser=${currentUser})}">Recurring bills</a>
+                    <a th:href="@{/receipts(currentUser=${currentUser})}">Receipt vault</a>
+                </div>
+            </details>
+        </nav>
+        <form method="get" th:action="@{/roundup}" class="user-switcher">
+            <label for="currentUser">Acting as</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                        th:selected="${m == currentUser}"></option>
+            </select>
+        </form>
+    </header>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- What round-up has saved so far -->
+    <section class="hero">
+        <div>
+            <h1>
+                <span th:text="${currentUser}">Mufliha</span> has saved
+                <span th:text="'৳' + ${overview.mySavedTotal}">৳0.00</span>
+            </h1>
+            <p class="lead" th:if="${overview.paymentCount > 0}">
+                Spare change from <strong th:text="${overview.paymentCount}">3</strong> payments.
+                Every time you pay someone back, the payment is rounded up and the extra is saved.
+            </p>
+            <p class="lead" th:if="${overview.paymentCount == 0}">
+                Nothing saved yet. Pay someone back on the
+                <a th:href="@{/debts(currentUser=${currentUser})}">Debts</a> page and the spare change lands here.
+            </p>
+        </div>
+        <div class="pots">
+            <div class="pot">
+                <span class="pot-value" th:text="'৳' + ${overview.myPersonalTotal}">৳0.00</span>
+                <span class="pot-label">in your personal goals</span>
+            </div>
+            <div class="pot">
+                <span class="pot-value" th:text="'৳' + ${overview.groupGoalTotal}">৳0.00</span>
+                <span class="pot-label">in group goals, from everyone</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="two-col">
+        <!-- Rules -->
+        <div>
+            <h2>Your rules</h2>
+            <p class="meta rules-note">These apply to payments <span th:text="${currentUser}">you</span> make.</p>
+            <form th:action="@{/roundup/settings}" method="post" class="card rules">
+                <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+
+                <label class="switch-row">
+                    <input type="checkbox" name="enabled" value="true" th:checked="${overview.settings.enabled}"/>
+                    <span>
+                        <strong>Round up my payments</strong>
+                        <span class="rule-help">Switch this off to stop saving.</span>
+                    </span>
+                </label>
+
+                <div class="rule">
+                    <label for="roundTo"><strong>Round up to the next</strong></label>
+                    <select id="roundTo" name="roundTo">
+                        <option value="10" th:selected="${overview.settings.roundTo.intValue() == 10}">৳10</option>
+                        <option value="50" th:selected="${overview.settings.roundTo.intValue() == 50}">৳50</option>
+                        <option value="100" th:selected="${overview.settings.roundTo.intValue() == 100}">৳100</option>
+                    </select>
+                </div>
+
+                <h3 class="rules-heading">Boosters</h3>
+
+                <label class="switch-row">
+                    <input type="checkbox" name="weekendDoubleEnabled" value="true"
+                           th:checked="${overview.settings.weekendDoubleEnabled}"/>
+                    <span>
+                        <strong>Double it on weekends</strong>
+                        <span class="rule-help">Friday and Saturday payments save twice the round-up.</span>
+                    </span>
+                </label>
+
+                <label class="switch-row">
+                    <input type="checkbox" name="fixedExtraEnabled" value="true"
+                           th:checked="${overview.settings.fixedExtraEnabled}"/>
+                    <span>
+                        <strong>Add a fixed amount to every payment</strong>
+                        <span class="rule-help">Saved on top of the round-up, every time.</span>
+                    </span>
+                </label>
+                <div class="rule rule-indent">
+                    <label for="fixedExtraAmount">Fixed amount (BDT)</label>
+                    <input id="fixedExtraAmount" type="number" step="0.01" min="0" name="fixedExtraAmount"
+                           th:value="${overview.settings.fixedExtraAmount}"/>
+                </div>
+
+                <h3 class="rules-heading">Where the money goes</h3>
+
+                <div class="choice-row">
+                    <label class="choice">
+                        <input type="radio" name="destinationType" value="PERSONAL"
+                               th:checked="${overview.settings.destinationType == 'PERSONAL'}"/>
+                        <span>A personal goal</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="destinationType" value="GROUP"
+                               th:checked="${overview.settings.destinationType == 'GROUP'}"/>
+                        <span>A group goal</span>
+                    </label>
+                </div>
+                <div class="rule">
+                    <label for="destinationName">Goal name</label>
+                    <input id="destinationName" type="text" name="destinationName" maxlength="60" required
+                           placeholder="e.g., Cox's Bazar trip" th:value="${overview.settings.destinationName}"/>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save rules</button>
+            </form>
+        </div>
+
+        <!-- What the rules do -->
+        <div>
+            <h2>What your rules do</h2>
+            <p class="meta rules-note">
+                Sample payments made today<span th:if="${overview.weekendToday}"> (a weekend)</span>,
+                using your saved rules.
+            </p>
+            <div class="card">
+                <p th:if="${#lists.isEmpty(overview.examples)}" class="hint">
+                    Round-up is switched off, so payments are not rounded.
+                </p>
+                <table class="data-table" th:if="${!#lists.isEmpty(overview.examples)}">
+                    <thead>
+                    <tr><th class="num">You owe</th><th class="num">Saved</th><th class="num">You pay</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ex : ${overview.examples}">
+                        <td class="num" th:text="'৳' + ${ex.paymentAmount}"></td>
+                        <td class="num"><span class="tag tag-saved" th:text="'+৳' + ${ex.totalSaved}"></span></td>
+                        <td class="num"><strong th:text="'৳' + ${ex.totalCharged}"></strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Saving history -->
+    <section>
+        <h2 class="section-title">Your round-ups</h2>
+        <div class="card table-scroll">
+            <p th:if="${#lists.isEmpty(overview.myHistory)}" class="hint">No round-ups yet.</p>
+            <table class="data-table" th:if="${!#lists.isEmpty(overview.myHistory)}">
+                <thead>
+                <tr>
+                    <th>When</th><th class="num">Payment</th><th class="num">Round-up</th>
+                    <th class="num">Boosters</th><th class="num">Saved</th><th>Goal</th><th>Rules used</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${overview.myHistory}">
+                    <td th:text="${#temporals.format(s.createdAt, 'dd MMM, HH:mm')}"></td>
+                    <td class="num" th:text="'৳' + ${s.paymentAmount}"></td>
+                    <td class="num" th:text="'৳' + ${s.roundUpAmount}"></td>
+                    <td class="num" th:text="'৳' + ${s.boosterAmount}"></td>
+                    <td class="num"><strong th:text="'৳' + ${s.totalSaved}"></strong></td>
+                    <td>
+                        <span th:text="${s.destinationName}"></span>
+                        <span class="tag" th:text="${s.destinationType == 'GROUP'} ? 'group' : 'personal'"></span>
+                    </td>
+                    <td class="meta" th:text="${s.rulesApplied}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+</body>
+</html>
