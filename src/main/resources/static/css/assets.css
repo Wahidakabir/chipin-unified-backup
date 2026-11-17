@@ -1,0 +1,46 @@
+/* Feature 5: Shared assets page. Colours and type come from chipin-ui.css and the theme. */
+
+.form-note { margin: 0 0 16px; }
+.span-2 { grid-column: span 2; }
+.form-submit { margin-top: 18px; }
+
+.asset-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+.asset-header h3 { font-size: 1.3rem; }
+.asset-value { text-align: right; }
+.amount { display: block; font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; white-space: nowrap; }
+
+/* how much value is left */
+.value-track { height: 12px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.value-bar { display: block; height: 100%; background: var(--brand); border-radius: 999px; }
+.value-note { margin: 8px 0 0; }
+
+/* ownership share bars */
+.share-cell { display: flex; align-items: center; gap: 10px; min-width: 190px; }
+.share-track { flex: 1; height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; min-width: 80px; }
+.share-bar { display: block; height: 100%; background: var(--brand); border-radius: 999px; }
+
+/* log use, add cost, buy in */
+.asset-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
+.action-box {
+  display: flex; flex-direction: column; gap: 10px; align-items: flex-start;
+  background: var(--ground); border-radius: var(--r-md); padding: 16px;
+}
+.action-box input[type="text"] { width: 100%; }
+.action-box .btn { margin-top: auto; }
+.inline-fields { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
+.inline-fields input, .inline-fields select { flex: 1; min-width: 130px; }
+
+/* history */
+.history { margin-top: 22px; border-top: 2px solid var(--line); padding-top: 14px; }
+.history summary { cursor: pointer; font-weight: 700; color: var(--ink); }
+.history[open] summary { margin-bottom: 10px; }
+.table-scroll { overflow-x: auto; }
+.table-scroll .data-table { min-width: 640px; }
+.nowrap { white-space: nowrap; }
+
+@media (max-width: 860px) {
+  .asset-actions { grid-template-columns: 1fr; }
+  .asset-header { flex-direction: column; }
+  .asset-value { text-align: left; }
+  .span-2 { grid-column: span 1; }
+}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chipin — Shared assets</title>
+    <link rel="stylesheet" th:href="@{/css/chipin-ui.css}">
+    <link rel="stylesheet" th:href="@{/css/theme-fun.css}">
+    <link rel="stylesheet" th:href="@{/css/assets.css}">
+</head>
+<body>
+<div class="container">
+    <header class="appbar">
+        <a class="brand" th:href="@{/debts(currentUser=${currentUser})}">Chipin</a>
+        <nav class="tabs" aria-label="Chipin features">
+            <a th:href="@{/debts(currentUser=${currentUser})}" class="tab">Debts</a>
+            <a th:href="@{/bills(currentUser=${currentUser})}" class="tab">Itemized bills</a>
+            <a th:href="@{/roundup(currentUser=${currentUser})}" class="tab">Round-up</a>
+            <a th:href="@{/assets(currentUser=${currentUser})}" class="tab active">Shared assets</a>
+            <details class="more">
+                <summary class="tab">Team features</summary>
+                <div class="more-menu">
+                    <a th:href="@{/voting(currentUser=${currentUser})}">Expense voting</a>
+                    <a th:href="@{/emergency(currentUser=${currentUser})}">Emergency fund</a>
+                    <a th:href="@{/health-score(currentUser=${currentUser})}">Health score</a>
+                    <a th:href="@{/recurring(currentUser=${currentUser})}">Recurring bills</a>
+                    <a th:href="@{/receipts(currentUser=${currentUser})}">Receipt vault</a>
+                </div>
+            </details>
+        </nav>
+        <form method="get" th:action="@{/assets}" class="user-switcher">
+            <label for="currentUser">Acting as</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                        th:selected="${m == currentUser}"></option>
+            </select>
+        </form>
+    </header>
+
+    <div class="page-head">
+        <h1>Shared assets</h1>
+        <p class="subtitle">Things the group bought together. Chipin tracks who owns what share, splits running costs by who actually used it, and works out a fair price when someone joins or leaves.</p>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- Register -->
+    <section class="card">
+        <h2>Register an asset</h2>
+        <p class="meta form-note">Enter what each member paid. The price is the total, and each share follows what that member paid.</p>
+        <form th:action="@{/assets/create}" method="post">
+            <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+            <div class="form-grid">
+                <div class="form-group span-2">
+                    <label for="assetName">Asset name</label>
+                    <input id="assetName" type="text" name="name" placeholder="e.g., Washing machine" maxlength="80" required/>
+                </div>
+                <div class="form-group">
+                    <label for="purchaseDate">Purchase date</label>
+                    <input id="purchaseDate" type="date" name="purchaseDate" th:value="${today}" th:max="${today}"/>
+                </div>
+                <div class="form-group">
+                    <label for="usefulLife">Useful life (months)</label>
+                    <input id="usefulLife" type="number" name="usefulLifeMonths" min="1" step="1" value="24" required/>
+                </div>
+                <div class="form-group" th:each="m : ${members}">
+                    <label th:text="${m} + ' paid (BDT)'">Member paid</label>
+                    <input type="number" name="paid" step="0.01" min="0" value="0"/>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary form-submit">Register asset</button>
+        </form>
+    </section>
+
+    <h2 class="section-title">Group assets</h2>
+    <div th:if="${#lists.isEmpty(assets)}" class="card">
+        <p class="hint">No shared assets yet. Register the first one above.</p>
+    </div>
+
+    <section th:each="v : ${assets}" class="card asset">
+        <div class="asset-header">
+            <div>
+                <h3 th:text="${v.asset.name}">Washing machine</h3>
+                <span class="meta">
+                    Bought <span th:text="${v.asset.purchaseDate}"></span> for
+                    <span th:text="'৳' + ${v.asset.purchasePrice}"></span>,
+                    loses <span th:text="'৳' + ${v.monthlyDepreciation}"></span> a month
+                </span>
+            </div>
+            <div class="asset-value">
+                <span class="amount" th:text="'৳' + ${v.currentValue}">৳18000.00</span>
+                <span class="meta">value today</span>
+            </div>
+        </div>
+
+        <!-- Value left -->
+        <div class="value-track" aria-hidden="true">
+            <span class="value-bar" th:style="'width:' + ${v.valueLeftPercent} + '%'"></span>
+        </div>
+        <p class="meta value-note">
+            <span th:text="${v.valueLeftPercent}">75</span>% of its value left after
+            <span th:text="${v.monthsOwned}">6</span> months,
+            <span th:text="${v.monthsLeft}">18</span> months of useful life to go.
+        </p>
+
+        <!-- Owners -->
+        <h4>Owners</h4>
+        <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Member</th><th>Share</th><th class="num">Worth today</th>
+                <th class="num">Uses since last cost</th><th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="o : ${v.owners}">
+                <td><strong th:text="${o.userId}">Afifa</strong></td>
+                <td>
+                    <div class="share-cell">
+                        <span class="share-track" aria-hidden="true">
+                            <span class="share-bar" th:style="'width:' + ${o.sharePercent} + '%'"></span>
+                        </span>
+                        <span th:text="${#numbers.formatDecimal(o.sharePercent, 1, 2)} + '%'">50.00%</span>
+                    </div>
+                </td>
+                <td class="num" th:text="'৳' + ${o.shareValue}"></td>
+                <td class="num" th:text="${o.uses}">0</td>
+                <td class="num">
+                    <form th:if="${v.buyoutPossible}" th:action="@{/assets/{id}/buyout(id=${v.asset.id})}" method="post">
+                        <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                        <input type="hidden" name="leavingUserId" th:value="${o.userId}"/>
+                        <button type="submit" class="btn btn-small btn-danger"
+                                th:text="'Buy out for ৳' + ${o.shareValue}">Buy out</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:each="o : ${v.otherUsers}">
+                <td><span th:text="${o.userId}"></span> <span class="tag tag-even">not an owner</span></td>
+                <td></td><td></td>
+                <td class="num" th:text="${o.uses}">0</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <!-- Actions -->
+        <div class="asset-actions">
+            <form th:action="@{/assets/{id}/use(id=${v.asset.id})}" method="post" class="action-box">
+                <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                <strong>Used it?</strong>
+                <span class="meta">Logged uses decide how the next cost is split.</span>
+                <button type="submit" class="btn btn-secondary" th:text="'Log a use for ' + ${currentUser}">Log a use</button>
+            </form>
+
+            <form th:action="@{/assets/{id}/costs(id=${v.asset.id})}" method="post" class="action-box">
+                <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                <strong>Add a repair or running cost</strong>
+                <span class="meta" th:if="${v.usesSinceLastCost > 0}">
+                    Will be split by the <span th:text="${v.usesSinceLastCost}">4</span> uses logged since the last cost.
+                </span>
+                <span class="meta" th:if="${v.usesSinceLastCost == 0}">
+                    No uses logged since the last cost, so it will be split by ownership share.
+                </span>
+                <input type="text" name="description" placeholder="e.g., Motor repair" maxlength="120" required/>
+                <div class="inline-fields">
+                    <input type="number" name="amount" step="0.01" min="0.01" placeholder="Amount" required/>
+                    <select name="paidByUserId" aria-label="Paid by">
+                        <option th:each="m : ${members}" th:value="${m}" th:text="'Paid by ' + ${m}"
+                                th:selected="${m == currentUser}"></option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Add cost</button>
+            </form>
+
+            <form th:if="${!#lists.isEmpty(v.nonOwners)}" th:action="@{/assets/{id}/buyin(id=${v.asset.id})}"
+                  method="post" class="action-box">
+                <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                <strong>Add a new owner</strong>
+                <span class="meta">They pay for their share at today's value. Existing owners give up share in proportion.</span>
+                <div class="inline-fields">
+                    <select name="joiningUserId" aria-label="New owner">
+                        <option th:each="m : ${v.nonOwners}" th:value="${m}" th:text="${m}"></option>
+                    </select>
+                    <input type="number" name="sharePercent" step="0.01" min="0.01" max="99.99"
+                           placeholder="Share %" required/>
+                </div>
+                <button type="submit" class="btn btn-secondary">Buy in</button>
+            </form>
+        </div>
+
+        <!-- History -->
+        <details class="history">
+            <summary>History (<span th:text="${#lists.size(v.events)}">0</span>)</summary>
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                    <tr><th>When</th><th>What happened</th><th class="num">Value then</th><th>Shares after</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${v.events}">
+                        <td class="nowrap" th:text="${#temporals.format(e.createdAt, 'dd MMM yyyy, HH:mm')}"></td>
+                        <td th:text="${e.description}"></td>
+                        <td class="num" th:text="'৳' + ${e.valueAtTime}"></td>
+                        <td class="meta" th:text="${e.sharesSnapshot}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    </section>
+</div>
+</body>
+</html>
