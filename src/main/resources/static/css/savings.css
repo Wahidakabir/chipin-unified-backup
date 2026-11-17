@@ -1,0 +1,478 @@
+/* Feature 15: Collaborative Savings Goals Styles */
+
+/* ==========================================
+   1. Goal Header & Meta
+   ========================================== */
+.goal-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: 0 4px 10px rgba(107, 78, 255, 0.05);
+}
+
+.goal-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.goal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.goal-title-row h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.goal-header-bar .meta {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.goal-switcher-box form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.goal-switcher-box select {
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  border: 2px solid var(--field-border);
+  background: var(--ground);
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.goal-switcher-box select:focus {
+  border-color: var(--brand);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--brand-wash);
+}
+
+.desc-text {
+  color: var(--ink-2);
+  font-style: italic;
+}
+
+/* ==========================================
+   2. Four Goal Summary Cards
+   ========================================== */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 992px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(107, 78, 255, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(107, 78, 255, 0.10);
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  font-weight: 700;
+}
+
+.stat-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--brand-wash);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--brand);
+}
+
+.stat-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.2;
+}
+
+.stat-subtext {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+
+.stat-card-saved {
+  background: linear-gradient(135deg, #ffffff 0%, #f6f2ff 100%);
+  border-color: #d1c2ff;
+}
+
+.stat-card-saved .stat-value {
+  color: var(--brand-strong);
+}
+
+.stat-card-progress .stat-value {
+  color: var(--brand);
+}
+
+.text-brand {
+  color: var(--brand-strong) !important;
+}
+
+/* ==========================================
+   3. Horizontal Progress Bar
+   ========================================== */
+.milestone-section {
+  margin-bottom: 24px;
+}
+
+.savings-progress-wrapper {
+  margin: 18px 0 24px 0;
+  padding: 16px 20px;
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 16px;
+  background: #e6ddf7;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #d4c8ee;
+  box-shadow: inset 0 2px 4px rgba(43, 27, 84, 0.08);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fill-brand {
+  background: linear-gradient(90deg, #6b4eff 0%, #8f4fff 60%, #b058f5 100%);
+  box-shadow: 0 0 10px rgba(107, 78, 255, 0.4);
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-top: 8px;
+}
+
+/* ==========================================
+   4. Four Equal-Sized Milestone Cards
+   ========================================== */
+.milestones-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .milestones-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .milestones-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.milestone-box {
+  border-radius: var(--r-md);
+  padding: 18px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.milestone-achieved {
+  background: linear-gradient(145deg, #ffffff 0%, #f1ecff 100%);
+  border: 2px solid var(--brand);
+  box-shadow: 0 4px 14px rgba(107, 78, 255, 0.14);
+}
+
+.milestone-pending {
+  background: var(--surface);
+  border: 2px dashed var(--line);
+  opacity: 0.9;
+}
+
+.milestone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
+.milestone-pct {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+.milestone-achieved .milestone-pct {
+  color: var(--brand-strong);
+}
+
+.milestone-pending .milestone-pct {
+  color: var(--ink-3);
+}
+
+.milestone-amount-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.milestone-amount {
+  font-size: 1.15rem;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.milestone-pending .milestone-amount {
+  color: var(--ink-2);
+}
+
+.milestone-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.milestone-badge-achieved {
+  background: #e7f8ef;
+  color: #0b7a42;
+  border: 1px solid #b2e8ca;
+}
+
+.milestone-badge-pending {
+  background: var(--ground);
+  color: var(--ink-3);
+  border: 1px solid var(--line);
+}
+
+/* ==========================================
+   5. Member Contribution Pledges Grid
+   ========================================== */
+.card-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-title-bar h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.plan-card {
+  background: var(--ground);
+  border: 2px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.12s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-2px);
+  border-color: #d1c2ff;
+}
+
+.plan-card strong {
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.plan-amount {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.plan-amount strong {
+  color: var(--brand-strong);
+  font-size: 1.05rem;
+}
+
+.sub-form-box {
+  margin-top: 20px;
+  padding: 18px 20px;
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.sub-form-box h3 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.form-note {
+  margin-top: -6px;
+  margin-bottom: 16px;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+/* ==========================================
+   6. Badges & Buttons
+   ========================================== */
+.badge-active {
+  background: var(--brand-wash);
+  color: var(--brand-strong);
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.badge-completed {
+  background: #e7f8ef;
+  color: #0b7a42;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.badge-overdue {
+  background: #ffedea;
+  color: #c92a2a;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.badge-pending {
+  background: var(--line);
+  color: var(--ink-3);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.btn-brand, .btn-primary {
+  background: var(--brand) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+
+.btn-brand:hover, .btn-primary:hover {
+  background: var(--brand-strong) !important;
+}
+
+.btn-brand:active, .btn-primary:active {
+  transform: scale(0.97);
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  background: var(--ground);
+  border-radius: var(--r-md);
+  color: var(--ink-3);
+  font-size: 0.95rem;
+}
