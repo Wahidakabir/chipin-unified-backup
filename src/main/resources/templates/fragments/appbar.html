@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="appbar(activeTab, currentUser)" class="appbar">
+    <a th:href="@{/(currentUser=${currentUser})}" class="brand">CHIPIN</a>
+
+    <nav class="tabs">
+        <a th:href="@{/(currentUser=${currentUser})}"
+           class="tab" th:classappend="${activeTab == 'overview'} ? 'active'">Overview</a>
+
+        <details class="tab more" th:classappend="${#lists.contains({'debts','splits','recurring'}, activeTab)} ? 'active'">
+            <summary>Expenses &amp; Splits</summary>
+            <div class="more-menu">
+                <a th:href="@{/debts(currentUser=${currentUser})}" th:classappend="${activeTab == 'debts'} ? 'active-sub'">Debt Simplification</a>
+                <a th:href="@{/splits(currentUser=${currentUser})}" th:classappend="${activeTab == 'splits'} ? 'active-sub'">Itemized Bills</a>
+                <a th:href="@{/recurring(currentUser=${currentUser})}" th:classappend="${activeTab == 'recurring'} ? 'active-sub'">Recurring Bills</a>
+            </div>
+        </details>
+
+        <details class="tab more" th:classappend="${#lists.contains({'voting','emergency','receipts'}, activeTab)} ? 'active'">
+            <summary>Approvals &amp; Audits</summary>
+            <div class="more-menu">
+                <a th:href="@{/voting(currentUser=${currentUser})}" th:classappend="${activeTab == 'voting'} ? 'active-sub'">Expense Voting</a>
+                <a th:href="@{/emergency(currentUser=${currentUser})}" th:classappend="${activeTab == 'emergency'} ? 'active-sub'">Emergency Fund</a>
+                <a th:href="@{/receipts(currentUser=${currentUser})}" th:classappend="${activeTab == 'receipts'} ? 'active-sub'">Receipt Vault</a>
+            </div>
+        </details>
+
+        <details class="tab more" th:classappend="${#lists.contains({'budgets','savings','roundup','assets','health'}, activeTab)} ? 'active'">
+            <summary>Budgets &amp; Savings</summary>
+            <div class="more-menu">
+                <a th:href="@{/budgets(currentUser=${currentUser})}" th:classappend="${activeTab == 'budgets'} ? 'active-sub'">Group Budget</a>
+                <a th:href="@{/savings(currentUser=${currentUser})}" th:classappend="${activeTab == 'savings'} ? 'active-sub'">Collaborative Savings</a>
+                <a th:href="@{/roundup(currentUser=${currentUser})}" th:classappend="${activeTab == 'roundup'} ? 'active-sub'">Round-Up Savings</a>
+                <a th:href="@{/assets(currentUser=${currentUser})}" th:classappend="${activeTab == 'assets'} ? 'active-sub'">Shared Assets</a>
+                <a th:href="@{/health-score(currentUser=${currentUser})}" th:classappend="${activeTab == 'health'} ? 'active-sub'">Financial Health Score</a>
+            </div>
+        </details>
+    </nav>
+
+    <form method="get" class="user-switcher">
+        <label for="currentUser">Acting as</label>
+        <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+            <option value="Afifa" th:selected="${currentUser == 'Afifa'}">Afifa</option>
+            <option value="Mufliha" th:selected="${currentUser == 'Mufliha'}">Mufliha</option>
+            <option value="Musarrat" th:selected="${currentUser == 'Musarrat'}">Musarrat</option>
+            <option value="Sayma" th:selected="${currentUser == 'Sayma'}">Sayma</option>
+        </select>
+    </form>
+</header>
+</body>
+</html>

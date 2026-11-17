@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Chipin — Financial Health Score</title>
-    <link rel="stylesheet" th:href="@{/css/health-score.css}">
+    <link rel="stylesheet" th:href="@{/css/chipin.css}">
 </head>
 <body>
 <div class="container">
@@ -13,20 +13,7 @@
         <a th:href="@{/health-score(currentUser=${currentUser})}" class="nav-link active">Feature 8: Health Score</a>
     </div>
 
-    <header class="top-bar">
-        <div>
-            <h1>Chipin — Group Financial Health Score</h1>
-            <p class="subtitle">Real-time financial wellness score computed from budget discipline, voting consensus, and emergency readiness.</p>
-        </div>
-
-        <form method="get" th:action="@{/health-score}" class="user-switcher">
-            <label for="currentUser">Acting as:</label>
-            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
-                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
-                        th:selected="${m == currentUser}"></option>
-            </select>
-        </form>
-    </header>
+    <div th:replace="~{fragments/appbar :: appbar('health', ${currentUser})}"></div>
 
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>

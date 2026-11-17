@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="navbar(activeTab, currentUser)" class="topbar">
+    <div class="topbar-inner">
+        <a th:href="@{/(currentUser=${currentUser})}" class="brand">Chipin</a>
+
+        <nav class="nav-links">
+            <a th:href="@{/(currentUser=${currentUser})}"
+               th:classappend="${activeTab == 'overview'} ? 'active'">Overview</a>
+
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropbtn"
+                        th:classappend="${#lists.contains({'debts','splits','recurring'}, activeTab)} ? 'active'">
+                    Expenses &amp; Splits ▾
+                </button>
+                <div class="nav-dropdown-content">
+                    <a th:href="@{/debts(currentUser=${currentUser})}">Debt Simplification</a>
+                    <a th:href="@{/splits(currentUser=${currentUser})}">Itemized Bill Split</a>
+                    <a th:href="@{/recurring(currentUser=${currentUser})}">Recurring Bills</a>
+                </div>
+            </div>
+
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropbtn"
+                        th:classappend="${#lists.contains({'voting','emergency','receipts'}, activeTab)} ? 'active'">
+                    Approvals &amp; Audits ▾
+                </button>
+                <div class="nav-dropdown-content">
+                    <a th:href="@{/voting(currentUser=${currentUser})}">Expense Voting</a>
+                    <a th:href="@{/emergency(currentUser=${currentUser})}">Emergency Fund</a>
+                    <a th:href="@{/receipts(currentUser=${currentUser})}">Receipt Vault</a>
+                </div>
+            </div>
+
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropbtn"
+                        th:classappend="${#lists.contains({'budgets','savings','roundup','health','assets'}, activeTab)} ? 'active'">
+                    Budgets &amp; Savings ▾
+                </button>
+                <div class="nav-dropdown-content">
+                    <a th:href="@{/budgets(currentUser=${currentUser})}">Group Budget</a>
+                    <a th:href="@{/savings(currentUser=${currentUser})}">Collaborative Savings</a>
+                    <a th:href="@{/roundup(currentUser=${currentUser})}">Round-Up Savings</a>
+                    <a th:href="@{/assets(currentUser=${currentUser})}">Shared Assets</a>
+                    <a th:href="@{/health-score(currentUser=${currentUser})}">Financial Health Score</a>
+                </div>
+            </div>
+        </nav>
+
+        <form method="get" class="user-switcher">
+            <label for="currentUser">Acting as</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option value="Afifa" th:selected="${currentUser == 'Afifa'}">Afifa</option>
+                <option value="Mufliha" th:selected="${currentUser == 'Mufliha'}">Mufliha</option>
+                <option value="Musarrat" th:selected="${currentUser == 'Musarrat'}">Musarrat</option>
+                <option value="Sayma" th:selected="${currentUser == 'Sayma'}">Sayma</option>
+            </select>
+        </form>
+    </div>
+</header>
+</body>
+</html>

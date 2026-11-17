@@ -1,44 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chipin — Savings goals</title>
-    <link rel="stylesheet" th:href="@{/css/chipin-ui.css}">
-    <link rel="stylesheet" th:href="@{/css/theme-fun.css}">
-    <link rel="stylesheet" th:href="@{/css/savings.css}">
+    <link rel="stylesheet" th:href="@{/css/chipin.css}">
+    <link rel="stylesheet" th:href="@{/css/chipin.css}">
+    <link rel="stylesheet" th:href="@{/css/chipin.css}">
 </head>
 <body>
 <div class="container">
-    <header class="appbar">
-        <a class="brand" th:href="@{/debts(currentUser=${currentUser})}">Chipin</a>
-        <nav class="tabs" aria-label="Chipin features">
-            <a th:href="@{/debts(currentUser=${currentUser})}" class="tab">Debts</a>
-            <a th:href="@{/bills(currentUser=${currentUser})}" class="tab">Itemized bills</a>
-            <a th:href="@{/roundup(currentUser=${currentUser})}" class="tab">Round-up</a>
-            <a th:href="@{/assets(currentUser=${currentUser})}" class="tab">Shared assets</a>
-            <a th:href="@{/budgets(currentUser=${currentUser})}" class="tab">Group budgets</a>
-            <a th:href="@{/savings(currentUser=${currentUser})}" class="tab active">Savings goals</a>
-            <details class="more">
-                <summary class="tab">Team features</summary>
-                <div class="more-menu">
-                    <a th:href="@{/voting(currentUser=${currentUser})}">Expense voting</a>
-                    <a th:href="@{/emergency(currentUser=${currentUser})}">Emergency fund</a>
-                    <a th:href="@{/health-score(currentUser=${currentUser})}">Health score</a>
-                    <a th:href="@{/recurring(currentUser=${currentUser})}">Recurring bills</a>
-                    <a th:href="@{/receipts(currentUser=${currentUser})}">Receipt vault</a>
-                </div>
-            </details>
-        </nav>
-        <form method="get" th:action="@{/savings}" class="user-switcher">
-            <input th:if="${selectedGoal != null}" type="hidden" name="goalId" th:value="${selectedGoal.id}"/>
-            <label for="currentUser">Acting as</label>
-            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
-                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
-                        th:selected="${m == currentUser}"></option>
-            </select>
-        </form>
-    </header>
+    <div th:replace="~{fragments/appbar :: appbar('savings', ${currentUser})}"></div>
 
     <div class="page-head">
         <h1>Collaborative savings goals</h1>
@@ -282,3 +254,4 @@
 </div>
 </body>
 </html>
+

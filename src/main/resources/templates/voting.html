@@ -1,31 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chipin - Expense Voting &amp; Approval</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/chipin.css}">
 </head>
 <body>
 <div class="container">
 
-    <header class="top-bar">
-        <div>
-            <h1>Chipin — Expense Voting &amp; Approval</h1>
-            <p class="subtitle">
-                Expenses above
-                <strong th:text="'৳' + ${#numbers.formatDecimal(approvalLimit, 0, 'COMMA', 0, 'POINT')}">৳5,000</strong>
-                require group consensus before entering the ledger.
-            </p>
-        </div>
-        <form method="get" th:action="@{/voting}" class="user-switcher">
-            <label for="currentUser">Acting as:</label>
-            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
-                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
-                        th:selected="${m == currentUser}"></option>
-            </select>
-        </form>
-    </header>
+    <div th:replace="~{fragments/appbar :: appbar('voting', ${currentUser})}"></div>
 
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>

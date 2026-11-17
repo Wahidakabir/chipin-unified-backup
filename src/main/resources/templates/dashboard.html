@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chipin — Smart Shared Finance</title>
+    <link rel="stylesheet" th:href="@{/css/chipin.css}">
+    <style>
+        .hero-stage {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 44px;
+    align-items: center;
+    padding: 20px 0 52px;
+    position: relative;
+    z-index: 1;
+}
+.hero-headline {
+    font-family: var(--font-hero);
+    font-size: clamp(3.2rem, 5.5vw, 4.7rem);
+    line-height: 0.98;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    margin: 0 0 22px;
+    text-transform: uppercase;
+}
+.hero-subcolumns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 30px;
+    color: var(--ink-3);
+    font-size: 0.94rem;
+    line-height: 1.6;
+}
+.card-stack {
+    position: relative;
+    height: 360px;
+    width: 100%;
+}
+.glass-virtual-card {
+    width: 320px;
+    height: 185px;
+    border-radius: 20px;
+    padding: 22px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: absolute;
+}
+.card-top {
+    top: 0;
+    left: 0;
+    transform: rotate(-4deg);
+    background: linear-gradient(135deg, #162a45 0%, #121829 100%);
+    z-index: 2;
+}
+.card-bottom {
+    bottom: 0;
+    right: 0;
+    transform: rotate(-3deg);
+    background: linear-gradient(135deg, #241d46 0%, #14182b 100%);
+    z-index: 1;
+}
+.vc-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--brand-strong);
+}
+.vc-number {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+.vc-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.84rem;
+    color: var(--ink-2);
+}
+
+        .section-heading {
+            font-family: var(--font-hero);
+            font-size: 1.85rem;
+            letter-spacing: 0.04em;
+            margin: 12px 0 18px;
+            color: #ffffff;
+        }
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+            gap: 18px;
+        }
+        .module-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-bottom: 0;
+            transition: transform 0.16s ease, border-color 0.16s ease;
+        }
+        .module-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(56, 189, 248, 0.45);
+        }
+        .module-card h3 { font-size: 1.15rem; margin: 10px 0 6px; }
+        .module-card p { color: var(--ink-3); font-size: 0.9rem; margin: 0 0 18px; flex: 1; }
+
+        @media (max-width: 860px) {
+            .hero-stage { grid-template-columns: 1fr; }
+            .card-stack { height: 280px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Unified Pill Navbar -->
+    <div th:replace="~{fragments/appbar :: appbar('overview', ${currentUser})}"></div>
+
+    <!-- Dark Fintech Split Hero -->
+    <section class="hero-stage">
+        <div>
+            <h1 class="hero-headline">YOUR SHARED LEDGER.<br>TOO EASY, TOO SAFE!</h1>
+
+            <div class="hero-subcolumns">
+                <div>
+                    Split itemized bills, simplify group debts, and automate recurring expenses with zero friction.
+                </div>
+                <div>
+                    Democratic expense voting, emergency pools, and savings vaults built for transparent shared living.
+                </div>
+            </div>
+
+            <div class="hero-cta-row">
+                <a th:href="@{/debts(currentUser=${currentUser})}" class="btn-hero-white">GET STARTED</a>
+                <a th:href="@{/voting(currentUser=${currentUser})}" class="btn btn-secondary">PROPOSE EXPENSE</a>
+            </div>
+        </div>
+
+        <!-- Two Floating Tilted Glass Cards -->
+        <div class="card-stack">
+            <div class="glass-virtual-card card-top">
+                <div class="vc-header">
+                    <span>CHIPIN LEDGER</span>
+                    <span>ACTIVE</span>
+                </div>
+                <div class="vc-number" th:text="'৳' + ${totalApprovedSpend != null ? totalApprovedSpend : '500.0'}">৳500.0</div>
+                <div class="vc-footer">
+                    <span th:text="${currentUser}">Musarrat</span>
+                    <span th:text="'Left: ৳' + ${remainingBudget != null ? remainingBudget : '24500.0'}">Left: ৳24500.0</span>
+                </div>
+            </div>
+
+            <div class="glass-virtual-card card-bottom">
+                <div class="vc-header">
+                    <span>HEALTH &amp; VAULT</span>
+                    <span th:text="${healthGrade != null ? healthGrade : 'B'}">B</span>
+                </div>
+                <div class="vc-number" th:text="(${healthScore != null ? healthScore : 70}) + ' / 100'">70 / 100</div>
+                <div class="vc-footer">
+                    <span>Afifa • Mufliha • Musarrat • Sayma</span>
+                    <span>2026</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Unified Modules Grid -->
+    <h2 class="section-heading">EXPLORE MODULES</h2>
+    <section class="module-grid">
+
+        <div class="module-card">
+            <div>
+                <span class="tag">DEBT ENGINE</span>
+                <h3>Debt Simplification &amp; Graph</h3>
+                <p>View net member balances and settle pairwise debts with the fewest possible transfers.</p>
+            </div>
+            <a th:href="@{/debts(currentUser=${currentUser})}" class="btn btn-primary btn-small">Open Debts</a>
+        </div>
+
+        <div class="module-card">
+            <div>
+                <span class="tag">BILL SPLITTING</span>
+                <h3>Itemized Bill Split</h3>
+                <p>Break down shared restaurant or grocery receipts line by line and assign items per member.</p>
+            </div>
+            <a th:href="@{/splits(currentUser=${currentUser})}" class="btn btn-primary btn-small">Open Splits</a>
+        </div>
+
+        <div class="module-card">
+            <div>
+                <span class="tag">GOVERNANCE</span>
+                <h3>Expense Voting &amp; Approval</h3>
+                <p th:text="(${pendingVotesCount != null ? pendingVotesCount : 0}) + ' proposal(s) awaiting member votes before posting to the ledger.'">
+                    0 proposal(s) awaiting member votes before posting to the ledger.
+                </p>
+            </div>
+            <a th:href="@{/voting(currentUser=${currentUser})}" class="btn btn-primary btn-small">Open Voting</a>
+        </div>
+
+        <div class="module-card">
+            <div>
+                <span class="tag">URGENT RELIEF</span>
+                <h3>Emergency Instant Fund</h3>
+                <p th:text="(${activeEmergenciesCount != null ? activeEmergenciesCount : 1}) + ' active urgent pool(s) open for instant member chip-in.'">
+                    1 active urgent pool(s) open for instant member chip-in.
+                </p>
+            </div>
+            <a th:href="@{/emergency(currentUser=${currentUser})}" class="btn btn-primary btn-small">Open Emergency Pool</a>
+        </div>
+
+        <div class="module-card">
+            <div>
+                <span class="tag">BUDGETS &amp; AUDITS</span>
+                <h3>Group Budget &amp; Health Score</h3>
+                <p>Track category spending caps, monthly burn rate, and live financial health scores.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a th:href="@{/budgets(currentUser=${currentUser})}" class="btn btn-primary btn-small">Group Budget</a>
+                <a th:href="@{/health-score(currentUser=${currentUser})}" class="btn btn-secondary btn-small">Health Score</a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div>
+                <span class="tag">SAVINGS &amp; ASSETS</span>
+                <h3>Savings Goals, Round-Ups &amp; Assets</h3>
+                <p>Contribute toward shared goals, track settlement round-ups, and manage co-owned items.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a th:href="@{/savings(currentUser=${currentUser})}" class="btn btn-primary btn-small">Savings</a>
+                <a th:href="@{/roundup(currentUser=${currentUser})}" class="btn btn-secondary btn-small">Round-Up</a>
+                <a th:href="@{/assets(currentUser=${currentUser})}" class="btn btn-secondary btn-small">Assets</a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div>
+                <span class="tag">AUTOMATION &amp; PROOFS</span>
+                <h3>Recurring Bills &amp; Receipt Vault</h3>
+                <p>Automate monthly utility splits and verify uploaded payment receipts across members.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a th:href="@{/recurring(currentUser=${currentUser})}" class="btn btn-primary btn-small">Recurring</a>
+                <a th:href="@{/receipts(currentUser=${currentUser})}" class="btn btn-secondary btn-small">Receipt Vault</a>
+            </div>
+        </div>
+
+    </section>
+</div>
+</body>
+</html>

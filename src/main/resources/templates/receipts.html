@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Chipin — Receipt Vault & Audit Verification</title>
-    <link rel="stylesheet" th:href="@{/css/receipts.css}">
+    <link rel="stylesheet" th:href="@{/css/chipin.css}">
 </head>
 <body>
 <div class="container">
@@ -15,20 +15,7 @@
         <a th:href="@{/receipts(currentUser=${currentUser})}" class="nav-link active">Feature 10: Receipt Vault</a>
     </div>
 
-    <header class="top-bar">
-        <div>
-            <h1>Chipin — Receipt Vault & Peer Audit Verification</h1>
-            <p class="subtitle">Upload proof-of-payment receipts, link them to group expenses, and peer-verify charges.</p>
-        </div>
-
-        <form method="get" th:action="@{/receipts}" class="user-switcher">
-            <label for="currentUser">Acting as:</label>
-            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
-                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
-                        th:selected="${m == currentUser}"></option>
-            </select>
-        </form>
-    </header>
+    <div th:replace="~{fragments/appbar :: appbar('receipts', ${currentUser})}"></div>
 
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
