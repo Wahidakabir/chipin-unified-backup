@@ -1,0 +1,33 @@
+/* Feature 2: Itemized Bills page. Colours and type come from chipin-ui.css. */
+
+.bill-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.bill-header h3 { font-size: 1.25rem; }
+.amount-badge { text-align: right; }
+.amount { display: block; font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; white-space: nowrap; }
+
+/* add item */
+.item-form {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: var(--ground); padding: 14px; border-radius: var(--r-md); margin-top: 14px;
+}
+.item-form input[type="text"] { flex: 2; min-width: 160px; }
+.item-form input[type="number"] { flex: 1; min-width: 110px; }
+.member-checks { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; flex-basis: 100%; }
+.check { display: flex; align-items: center; gap: 6px; font-size: 0.92rem; color: var(--ink); cursor: pointer; }
+
+/* tax, tip, discount */
+.extras-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-top: 14px; }
+.extras-form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--ink-3); }
+.extras-form input { width: 110px; }
+
+.summary-row {
+  display: flex; gap: 20px; flex-wrap: wrap; border-top: 1px solid var(--line);
+  padding-top: 14px; margin-top: 18px; font-size: 0.9rem; color: var(--ink-2);
+}
+.summary-row strong { color: var(--ink); }
+.bill-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+
+@media (max-width: 720px) {
+  .bill-header { flex-direction: column; }
+  .amount-badge { text-align: left; }
+}

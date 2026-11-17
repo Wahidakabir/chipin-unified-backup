@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chipin — Recurring Expenses & Split Scheduler</title>
+    <link rel="stylesheet" th:href="@{/css/recurring.css}">
+</head>
+<body>
+<div class="container">
+    <div class="nav-tabs">
+        <a th:href="@{/voting(currentUser=${currentUser})}" class="nav-link">Feature 6: Expense Voting</a>
+        <a th:href="@{/emergency(currentUser=${currentUser})}" class="nav-link">Feature 7: Emergency Fund</a>
+        <a th:href="@{/health-score(currentUser=${currentUser})}" class="nav-link">Feature 8: Health Score</a>
+        <a th:href="@{/recurring(currentUser=${currentUser})}" class="nav-link active">Feature 9: Recurring Bills</a>
+    </div>
+
+    <header class="top-bar">
+        <div>
+            <h1>Chipin — Recurring Expenses & Split Scheduler</h1>
+            <p class="subtitle">Automate repeating group bills (Wi-Fi, Rent, Utilities) with scheduled equal splits.</p>
+        </div>
+
+        <form method="get" th:action="@{/recurring}" class="user-switcher">
+            <label for="currentUser">Acting as:</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                        th:selected="${m == currentUser}"></option>
+            </select>
+        </form>
+    </header>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- Create Recurring Schedule -->
+    <section class="card">
+        <h2>Schedule a Recurring Group Expense</h2>
+        <form th:action="@{/recurring/create}" th:object="${newRecurring}" method="post" class="form-grid">
+            <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+
+            <div class="form-group">
+                <label>Bill Title</label>
+                <input type="text" th:field="*{title}" placeholder="e.g., Apartment Wi-Fi Bill" required/>
+                <span class="error-text" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" th:field="*{category}" placeholder="Utilities / Rent / Subscription" required/>
+            </div>
+
+            <div class="form-group">
+                <label>Total Amount (BDT)</label>
+                <input type="number" step="0.01" th:field="*{amount}" placeholder="2400" required/>
+                <span class="error-text" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Billing Frequency</label>
+                <select th:field="*{frequency}">
+                    <option value="MONTHLY">MONTHLY</option>
+                    <option value="WEEKLY">WEEKLY</option>
+                    <option value="YEARLY">YEARLY</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>First / Next Due Date</label>
+                <input type="date" th:field="*{nextDueDate}" required/>
+            </div>
+
+            <div class="form-group" style="justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary">Create Recurring Schedule</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Scheduled Bills List -->
+    <section>
+        <h2>Scheduled Group Bills</h2>
+        <div th:if="${#lists.isEmpty(schedules)}" class="card">
+            No recurring expenses scheduled yet. Create one above!
+        </div>
+
+        <div th:each="item : ${schedules}" class="card" th:classappend="${!item.active} ? 'paused-card' : ''">
+            <div class="proposal-header">
+                <div>
+                    <span class="freq-pill" th:text="${item.frequency}"></span>
+                    <h3 style="margin-top: 6px;" th:text="${item.title}"></h3>
+                    <span class="meta">
+                        Category: <strong th:text="${item.category}"></strong>
+                        • Paid by <strong th:text="${item.createdByUserId}"></strong>
+                        • Next Due: <strong th:text="${item.nextDueDate}"></strong>
+                        <span th:if="${item.lastProcessedDate != null}"
+                              th:text="' • Last Run: ' + ${item.lastProcessedDate}"></span>
+                    </span>
+                </div>
+                <div class="amount-badge">
+                    <span class="amount" th:text="'৳' + ${item.amount}"></span>
+                    <span class="status-badge"
+                          th:classappend="${item.active} ? 'status-active' : 'status-paused'"
+                          th:text="${item.active} ? 'ACTIVE' : 'PAUSED'"></span>
+                </div>
+            </div>
+
+            <div class="vote-summary">
+                <strong>Automated Member Splits:</strong>
+                <span th:each="entry : ${item.splits}" class="tag"
+                      th:text="${entry.key} + ': ৳' + ${entry.value}"></span>
+            </div>
+
+            <div class="action-row">
+                <form th:if="${item.active}" th:action="@{/recurring/{id}/trigger(id=${item.id})}" method="post" style="display:inline;">
+                    <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                    <button type="submit" class="btn btn-run">Run Billing Cycle Now</button>
+                </form>
+
+                <form th:action="@{/recurring/{id}/toggle(id=${item.id})}" method="post" style="display:inline;">
+                    <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                    <button type="submit" class="btn btn-secondary"
+                            th:text="${item.active} ? 'Pause Schedule' : 'Resume Schedule'"></button>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

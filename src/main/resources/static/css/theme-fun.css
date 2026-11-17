@@ -1,0 +1,53 @@
+/* Look 3: friendly and colourful. Load AFTER chipin-ui.css to switch both pages. */
+:root {
+  --ground: #f5f0ff;
+  --surface: #ffffff;
+  --ink: #2b1b54;
+  --ink-2: #5e4f85;
+  --ink-3: #8478ab;
+  --line: #e6ddf7;
+  --field-border: #d4c8ee;
+
+  --brand: #6b4eff;
+  --brand-strong: #5233e6;
+  --brand-wash: #ece7ff;
+  --owe: #e8890c;
+  --owe-wash: #fff0d6;
+  --owe-ink: #8f5300;
+  --even: #b5abd0;
+  --edge: #a99bcf;
+
+  --on-ink: #ffffff;
+  --on-brand: #ffffff;
+  --r-lg: 28px;
+  --r-md: 16px;
+  --r-sm: 10px;
+  --shadow-float: 0 12px 28px rgba(107, 78, 255, 0.22);
+  --font: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* chunky, sticker-like containers */
+.card { border: 2px solid var(--line); box-shadow: 0 5px 0 var(--line); }
+.tab.active { background: var(--brand); color: var(--on-brand); }
+.btn { font-weight: 800; padding: 11px 22px; }
+.btn-secondary { border-width: 2px; border-color: var(--brand); color: var(--brand-strong); }
+.btn-secondary:hover { background: var(--brand-wash); }
+input, select { border-width: 2px; }
+.page-head h1 { font-size: 2.3rem; }
+
+/* the headline sits on a colour panel */
+.hero {
+  background: linear-gradient(120deg, #6b4eff 0%, #8f4fff 60%, #b058f5 100%);
+  color: #ffffff; padding: 34px 36px; border-radius: 32px; box-shadow: 0 6px 0 #4a31c9;
+}
+.hero h1 { color: #ffffff; }
+.hero .lead { color: rgba(255, 255, 255, 0.92); }
+.hero .lead a { color: #ffffff; }
+.hero .btn-primary { background: #ffffff; color: var(--brand-strong); }
+.hero .btn-primary:hover { background: #fff0d6; }
+
+/* small friendly touches */
+.pay-who::before { content: "💸 "; }
+.node-owing .node-initial { fill: #2b1b54; }
+.node-circle { stroke-width: 4; }
+.edge-line { stroke-width: 3; }

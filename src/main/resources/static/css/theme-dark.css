@@ -1,0 +1,40 @@
+/* Look 2: midnight dashboard. Load AFTER chipin-ui.css to switch both pages to dark. */
+:root {
+  --ground: #0b1020;
+  --surface: #131a2e;
+  --ink: #e9edf8;
+  --ink-2: #a9b2cc;
+  --ink-3: #7b86a6;
+  --line: #232c47;
+  --field-border: #33405f;
+
+  --brand: #5f85ff;
+  --brand-strong: #a3b8ff;
+  --brand-wash: #1d2850;
+  --owe: #de7234;
+  --owe-wash: #3a2418;
+  --owe-ink: #ffb98c;
+  --even: #6c7693;
+  --edge: #5f6b8c;
+
+  --ok-ink: #7be0ae;
+  --ok-wash: #11382a;
+  --bad-ink: #ff9a8f;
+  --bad-wash: #3d1b18;
+  --warn-ink: #f2c46b;
+  --warn-wash: #3a2f12;
+
+  --on-ink: #0b1020;
+  --on-brand: #0b1020;
+  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --scheme: dark;
+}
+.btn-primary:hover, .btn-verify:hover { background: var(--brand-strong); }
+.tab:hover { background: var(--line); }
+.more-menu a:hover { background: var(--ground); }
+.edge-label-bg { fill: var(--surface); }
+
+/* The graph nodes glow softly: the one flourish of this look. */
+.node-circle { stroke: var(--surface); }
+.node-owed .node-circle { filter: drop-shadow(0 0 7px rgba(95, 133, 255, 0.7)); }
+.node-owing .node-circle { filter: drop-shadow(0 0 7px rgba(222, 114, 52, 0.65)); }

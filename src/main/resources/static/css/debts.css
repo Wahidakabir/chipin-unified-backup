@@ -1,0 +1,85 @@
+/* Feature 1: Debt Simplification page. Colours and type come from chipin-ui.css. */
+
+/* ---------- hero statement ---------- */
+.hero {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+  flex-wrap: wrap; margin-bottom: 28px;
+}
+.hero h1 {
+  margin: 0 0 8px; font-size: clamp(1.9rem, 4.2vw, 2.9rem); letter-spacing: -0.03em; line-height: 1.1;
+}
+.hero .num-big { font-variant-numeric: tabular-nums; }
+.hero .arrow-word { color: var(--ink-3); font-weight: 500; }
+.lead { margin: 0; color: var(--ink-2); font-size: 1.05rem; max-width: 66ch; }
+.hero .btn { padding: 13px 26px; font-size: 1rem; }
+
+/* ---------- graphs ---------- */
+.graph-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 14px; }
+.graph-card { margin-bottom: 0; padding: 20px 20px 16px; }
+.graph-card .caption { margin: 0 0 10px; color: var(--ink-3); font-size: 0.85rem; }
+.debt-graph { width: 100%; height: auto; display: block; touch-action: none; }
+.graph-info { font-size: 0.9rem; color: var(--ink-2); margin: 8px 0 0; min-height: 1.4em; }
+
+.edge-line { stroke: #8b91a0; }
+.arrow-head { fill: #8b91a0; }
+.edge-label { font-size: 12px; font-weight: 700; fill: var(--ink); }
+.edge-label-bg { fill: var(--surface); stroke: var(--line); }
+.edge, .node { transition: opacity 0.15s; }
+.edge.dim, .node.dim { opacity: 0.15; }
+
+.node { cursor: grab; outline: none; }
+.node:active { cursor: grabbing; }
+.node-circle { stroke: var(--surface); stroke-width: 3; }
+.node:focus .node-circle { stroke: var(--ink); }
+.node-owing .node-circle { fill: var(--owe); }
+.node-owed .node-circle { fill: var(--brand); }
+.node-even .node-circle { fill: var(--even); }
+.node-initial { fill: #ffffff; font-weight: 700; font-size: 16px; pointer-events: none; }
+.node-name { font-size: 13px; font-weight: 700; fill: var(--ink); pointer-events: none; }
+.node-sub { font-size: 11px; fill: var(--ink-3); pointer-events: none; }
+.empty-note { font-size: 14px; fill: var(--ink-3); }
+
+.legend { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 0.85rem; color: var(--ink-2); margin: 0; }
+.legend-note { color: var(--ink-3); }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+.dot-owing { background: var(--owe); }
+.dot-owed { background: var(--brand); }
+.dot-even { background: var(--even); }
+
+/* ---------- balances: bars grow left (owes) or right (is owed) from a centre line ---------- */
+.balance-list { list-style: none; margin: 0; padding: 0; }
+.balance-row {
+  display: grid; grid-template-columns: 120px 1fr 130px; align-items: center; gap: 14px;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+}
+.balance-row:last-child { border-bottom: none; }
+.balance-name { font-weight: 700; }
+.balance-track { position: relative; height: 14px; }
+.balance-track::before {
+  content: ""; position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--line);
+}
+.balance-bar { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+.balance-bar.owed { left: 50%; background: var(--brand); border-radius: 0 6px 6px 0; }
+.balance-bar.owing { right: 50%; background: var(--owe); border-radius: 6px 0 0 6px; }
+.balance-text { text-align: right; font-size: 0.9rem; color: var(--ink-2); }
+.balance-text strong { color: var(--ink); font-size: 1rem; }
+.balance-key { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--ink-3); padding: 0 130px 6px 134px; }
+
+/* ---------- payments ---------- */
+.pay-list { list-style: none; margin: 0; padding: 0; }
+.pay-row {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.pay-row:last-child { border-bottom: none; }
+.pay-who { flex: 1; min-width: 200px; font-size: 1.02rem; }
+.pay-amount { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.two-col .card { margin-bottom: 0; }
+
+@media (max-width: 860px) {
+  .graph-row, .two-col { grid-template-columns: 1fr; }
+  .balance-row { grid-template-columns: 90px 1fr 110px; }
+  .balance-key { padding: 0 110px 6px 104px; }
+}

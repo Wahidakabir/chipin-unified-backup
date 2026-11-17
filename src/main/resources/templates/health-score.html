@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chipin — Financial Health Score</title>
+    <link rel="stylesheet" th:href="@{/css/health-score.css}">
+</head>
+<body>
+<div class="container">
+    <div class="nav-tabs">
+        <a th:href="@{/voting(currentUser=${currentUser})}" class="nav-link">Feature 6: Expense Voting</a>
+        <a th:href="@{/emergency(currentUser=${currentUser})}" class="nav-link">Feature 7: Emergency Fund</a>
+        <a th:href="@{/health-score(currentUser=${currentUser})}" class="nav-link active">Feature 8: Health Score</a>
+    </div>
+
+    <header class="top-bar">
+        <div>
+            <h1>Chipin — Group Financial Health Score</h1>
+            <p class="subtitle">Real-time financial wellness score computed from budget discipline, voting consensus, and emergency readiness.</p>
+        </div>
+
+        <form method="get" th:action="@{/health-score}" class="user-switcher">
+            <label for="currentUser">Acting as:</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                        th:selected="${m == currentUser}"></option>
+            </select>
+        </form>
+    </header>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- Main Score Hero Card -->
+    <section class="card score-hero" th:classappend="'border-' + ${report.statusColor}">
+        <div class="score-circle" th:classappend="'bg-' + ${report.statusColor}">
+            <span class="score-number" th:text="${report.overallScore}"></span>
+            <span class="score-max">/ 100</span>
+        </div>
+        <div class="score-details">
+            <span class="grade-pill" th:classappend="'pill-' + ${report.statusColor}" th:text="${report.grade}"></span>
+            <h2>Overall Group Financial Health</h2>
+            <p class="meta">
+                Total Approved Expenses: <strong th:text="'৳' + ${report.totalApprovedSpent}"></strong>
+                of <strong th:text="'৳' + ${report.monthlyBudgetLimit}"></strong> monthly budget
+                (<span th:text="${report.budgetUsagePercent} + '% used'"></span>)
+            </p>
+        </div>
+    </section>
+
+    <!-- 3 Pillar Breakdown -->
+    <section class="pillars-grid">
+        <div class="card">
+            <span class="pillar-label">1. Budget Discipline</span>
+            <div class="pillar-score" th:text="${report.budgetDisciplineScore} + ' / 40 pts'"></div>
+            <p class="meta" th:text="'Remaining Budget: ৳' + ${report.remainingBudget}"></p>
+        </div>
+
+        <div class="card">
+            <span class="pillar-label">2. Voting Consensus</span>
+            <div class="pillar-score" th:text="${report.consensusRateScore} + ' / 30 pts'"></div>
+            <p class="meta" th:text="${report.approvedProposals} + ' approved / ' + ${report.totalProposals} + ' total proposals'"></p>
+        </div>
+
+        <div class="card">
+            <span class="pillar-label">3. Emergency Readiness</span>
+            <div class="pillar-score" th:text="${report.emergencyReadinessScore} + ' / 30 pts'"></div>
+            <p class="meta" th:text="${report.fulfilledEmergencies} + ' fulfilled / ' + ${report.totalEmergencies} + ' emergency pools'"></p>
+        </div>
+    </section>
+
+    <!-- Configure Monthly Budget Target -->
+    <section class="card">
+        <h3>Configure Monthly Group Budget Target</h3>
+        <form th:action="@{/health-score/budget}" method="post" class="budget-form">
+            <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+            <input type="number" step="0.01" name="monthlyBudgetLimit" th:value="${report.monthlyBudgetLimit}" required/>
+            <button type="submit" class="btn btn-primary">Update Budget & Recalculate</button>
+        </form>
+    </section>
+
+    <!-- Member Ledger Share & Smart Insights -->
+    <section class="two-col">
+        <div class="card">
+            <h3>Cumulative Member Expense Shares</h3>
+            <ul class="share-list">
+                <li th:each="entry : ${report.memberSpendingShares}">
+                    <span th:text="${entry.key}"></span>
+                    <strong th:text="'৳' + ${entry.value}"></strong>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Actionable Financial Insights</h3>
+            <ul class="tips-list">
+                <li th:each="tip : ${report.recommendations}" th:text="${tip}"></li>
+            </ul>
+        </div>
+    </section>
+</div>
+</body>
+</html>

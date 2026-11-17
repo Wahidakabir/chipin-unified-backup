@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chipin — Receipt Vault & Audit Verification</title>
+    <link rel="stylesheet" th:href="@{/css/receipts.css}">
+</head>
+<body>
+<div class="container">
+    <div class="nav-tabs">
+        <a th:href="@{/voting(currentUser=${currentUser})}" class="nav-link">Feature 6: Expense Voting</a>
+        <a th:href="@{/emergency(currentUser=${currentUser})}" class="nav-link">Feature 7: Emergency Fund</a>
+        <a th:href="@{/health-score(currentUser=${currentUser})}" class="nav-link">Feature 8: Health Score</a>
+        <a th:href="@{/recurring(currentUser=${currentUser})}" class="nav-link">Feature 9: Recurring Bills</a>
+        <a th:href="@{/receipts(currentUser=${currentUser})}" class="nav-link active">Feature 10: Receipt Vault</a>
+    </div>
+
+    <header class="top-bar">
+        <div>
+            <h1>Chipin — Receipt Vault & Peer Audit Verification</h1>
+            <p class="subtitle">Upload proof-of-payment receipts, link them to group expenses, and peer-verify charges.</p>
+        </div>
+
+        <form method="get" th:action="@{/receipts}" class="user-switcher">
+            <label for="currentUser">Acting as:</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                        th:selected="${m == currentUser}"></option>
+            </select>
+        </form>
+    </header>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- Upload Receipt Form -->
+    <section class="card">
+        <h2>Upload Proof-of-Payment Receipt</h2>
+        <form th:action="@{/receipts/upload}" method="post" enctype="multipart/form-data" class="form-grid">
+            <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+
+            <div class="form-group">
+                <label>Merchant / Store Name</label>
+                <input type="text" name="merchantName" placeholder="e.g., Shwapno / Amber IT" required/>
+            </div>
+
+            <div class="form-group">
+                <label>Receipt Total (BDT)</label>
+                <input type="number" step="0.01" name="receiptAmount" placeholder="1850" required/>
+            </div>
+
+            <div class="form-group">
+                <label>Link to Group Expense (Optional)</label>
+                <select name="linkedExpenseId">
+                    <option value="">-- Standalone / Unlinked Receipt --</option>
+                    <option th:each="exp : ${expenses}" th:value="${exp.id}"
+                            th:text="'#' + ${exp.id} + ' - ' + ${exp.title} + ' (৳' + ${exp.totalAmount} + ')'"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Receipt File (JPG, PNG, PDF)</label>
+                <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required/>
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Itemized Summary / Notes</label>
+                <input type="text" name="itemSummary" placeholder="e.g., Rice 5kg, Oil 2L, Milk, Cleaning supplies"/>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Upload Receipt to Vault</button>
+        </form>
+    </section>
+
+    <!-- Uploaded Receipts Gallery & Audit -->
+    <section>
+        <h2>Group Receipt Vault</h2>
+        <div th:if="${#lists.isEmpty(receipts)}" class="card">
+            No receipts uploaded yet. Upload a receipt above to start verification!
+        </div>
+
+        <div th:each="r : ${receipts}" class="card receipt-card">
+            <div class="receipt-preview">
+                <img th:if="${r.fileType == 'IMAGE'}"
+                     th:src="@{'/uploads/receipts/' + ${r.storedFileName}}"
+                     alt="Receipt Preview"/>
+                <a th:if="${r.fileType == 'PDF'}"
+                   th:href="@{'/uploads/receipts/' + ${r.storedFileName}}"
+                   target="_blank" class="pdf-badge">View PDF Receipt</a>
+            </div>
+
+            <div class="receipt-body">
+                <div class="proposal-header">
+                    <div>
+                        <h3 th:text="${r.merchantName}"></h3>
+                        <span class="meta">
+                            Uploaded by <strong th:text="${r.uploadedByUserId}"></strong>
+                            • File: <span th:text="${r.originalFileName}"></span>
+                            <span th:if="${r.linkedExpenseId != null}"
+                                  th:text="' • Linked Expense #' + ${r.linkedExpenseId}"></span>
+                        </span>
+                    </div>
+                    <div class="amount-badge">
+                        <span class="amount" th:text="'৳' + ${r.receiptAmount}"></span>
+                        <span class="status-badge"
+                              th:classappend="${r.verificationStatus == 'VERIFIED'} ? 'status-verified' : (${r.verificationStatus == 'FLAGGED'} ? 'status-flagged' : 'status-unverified')"
+                              th:text="${r.verificationStatus}"></span>
+                    </div>
+                </div>
+
+                <p th:if="${r.itemSummary != null and !r.itemSummary.isEmpty()}"
+                   class="item-box" th:text="'Items: ' + ${r.itemSummary}"></p>
+
+                <div th:if="${r.verifiedByUserId != null}" class="audit-log">
+                    <strong>Audit Decision:</strong>
+                    <span th:text="${r.verificationStatus} + ' by ' + ${r.verifiedByUserId} + ' — ' + ${r.auditNote}"></span>
+                </div>
+
+                <!-- Peer Audit Controls -->
+                <div th:if="${r.verificationStatus == 'UNVERIFIED'}" class="audit-controls">
+                    <form th:action="@{/receipts/{id}/audit(id=${r.id})}" method="post" class="audit-form">
+                        <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                        <input type="text" name="auditNote" placeholder="Optional audit comment (e.g., Matches bill)"/>
+                        <button type="submit" name="decision" value="VERIFIED" class="btn btn-verify">Verify Receipt</button>
+                        <button type="submit" name="decision" value="FLAGGED" class="btn btn-flag">Flag Discrepancy</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

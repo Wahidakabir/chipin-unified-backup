@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chipin — Debts</title>
+    <link rel="stylesheet" th:href="@{/css/chipin-ui.css}">
+    <link rel="stylesheet" th:href="@{/css/theme-fun.css}">
+    <link rel="stylesheet" th:href="@{/css/debts.css}">
+</head>
+<body>
+<div class="container">
+    <header class="appbar">
+        <a class="brand" th:href="@{/debts(currentUser=${currentUser})}">Chipin</a>
+        <nav class="tabs" aria-label="Chipin features">
+            <a th:href="@{/debts(currentUser=${currentUser})}" class="tab active">Debts</a>
+            <a th:href="@{/bills(currentUser=${currentUser})}" class="tab">Itemized bills</a>
+            <a th:href="@{/roundup(currentUser=${currentUser})}" class="tab">Round-up</a>
+            <a th:href="@{/assets(currentUser=${currentUser})}" class="tab">Shared assets</a>
+            <details class="more">
+                <summary class="tab">Team features</summary>
+                <div class="more-menu">
+                    <a th:href="@{/voting(currentUser=${currentUser})}">Expense voting</a>
+                    <a th:href="@{/emergency(currentUser=${currentUser})}">Emergency fund</a>
+                    <a th:href="@{/health-score(currentUser=${currentUser})}">Health score</a>
+                    <a th:href="@{/recurring(currentUser=${currentUser})}">Recurring bills</a>
+                    <a th:href="@{/receipts(currentUser=${currentUser})}">Receipt vault</a>
+                </div>
+            </details>
+        </nav>
+        <form method="get" th:action="@{/debts}" class="user-switcher">
+            <label for="currentUser">Acting as</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                        th:selected="${m == currentUser}"></option>
+            </select>
+        </form>
+    </header>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- The headline says what the engine achieved -->
+    <section class="hero">
+        <div>
+            <h1 th:if="${!overview.settledUp}">
+                <span class="num-big" th:text="${overview.rawCount}">6</span> debts become
+                <span class="num-big" th:text="${overview.simplifiedCount}">3</span> payments
+            </h1>
+            <h1 th:if="${overview.settledUp}">Everyone is settled up</h1>
+
+            <p th:if="${!overview.settledUp}" class="lead">
+                From <span th:text="${overview.expenseCount}">5</span> unsettled expenses. Paying these instead of
+                every debt saves <strong th:text="${overview.paymentsSaved}">3</strong> payments.
+            </p>
+            <p th:if="${overview.settledUp}" class="lead">
+                Nothing is owed right now. Finalize a bill under
+                <a th:href="@{/bills(currentUser=${currentUser})}">Itemized bills</a> and the debts will show up here.
+            </p>
+        </div>
+        <form th:if="${!overview.settledUp}" th:action="@{/debts/settle-all}" method="post">
+            <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+            <button type="submit" class="btn btn-primary">Settle all</button>
+        </form>
+    </section>
+
+    <!-- Data for the graphs (read by debt-graph.js) -->
+    <div id="graph-data" hidden>
+        <span class="g-member" th:each="b : ${overview.balances}"
+              th:attr="data-name=${b.userId},data-balance=${b.balance}"></span>
+        <span class="g-before" th:each="e : ${overview.rawDebts}"
+              th:attr="data-from=${e.fromUserId},data-to=${e.toUserId},data-amount=${e.amount}"></span>
+        <span class="g-after" th:each="e : ${overview.simplifiedPayments}"
+              th:attr="data-from=${e.fromUserId},data-to=${e.toUserId},data-amount=${e.amount}"></span>
+    </div>
+
+    <!-- Before and after -->
+    <section class="graph-row">
+        <div class="card graph-card">
+            <h2>Before</h2>
+            <p class="caption">Every direct debt from the expenses</p>
+            <svg id="graph-before" class="debt-graph" viewBox="0 0 480 360" role="img"
+                 aria-label="Graph of direct debts between members"></svg>
+            <p id="info-before" class="graph-info">Hover a member or an arrow. Drag members to rearrange.</p>
+        </div>
+        <div class="card graph-card">
+            <h2>After</h2>
+            <p class="caption">The fewest payments that clear everything</p>
+            <svg id="graph-after" class="debt-graph" viewBox="0 0 480 360" role="img"
+                 aria-label="Graph of simplified payments between members"></svg>
+            <p id="info-after" class="graph-info">Hover a member or an arrow. Drag members to rearrange.</p>
+        </div>
+    </section>
+    <p class="legend">
+        <span><span class="dot dot-owed"></span>is owed money</span>
+        <span><span class="dot dot-owing"></span>owes money</span>
+        <span><span class="dot dot-even"></span>settled</span>
+        <span class="legend-note">Arrows point from the person who pays to the person who receives.</span>
+    </p>
+
+    <!-- Payments still needed -->
+    <section th:if="${!overview.settledUp}">
+        <h2 class="section-title">Payments to make</h2>
+        <div class="card">
+            <ul class="pay-list">
+                <li class="pay-row" th:each="p : ${overview.simplifiedPayments}">
+                    <span class="pay-who">
+                        <strong th:text="${p.fromUserId}">Afifa</strong> pays
+                        <strong th:text="${p.toUserId}">Mufliha</strong>
+                    </span>
+                    <span class="pay-amount" th:text="'৳' + ${p.amount}">৳510.00</span>
+                    <form th:action="@{/debts/settle}" method="post">
+                        <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                        <input type="hidden" name="fromUserId" th:value="${p.fromUserId}"/>
+                        <input type="hidden" name="toUserId" th:value="${p.toUserId}"/>
+                        <input type="hidden" name="amount" th:value="${p.amount}"/>
+                        <button type="submit" class="btn btn-secondary btn-small">Mark as paid</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Who is ahead or behind -->
+    <section class="two-col section-title">
+        <div>
+            <h2>Net balances</h2>
+            <p class="meta" style="margin: 0 0 12px;">What each person is owed minus what they owe.</p>
+            <div class="card">
+                <ul class="balance-list">
+                    <li class="balance-row" th:each="b : ${overview.balances}">
+                        <span class="balance-name" th:text="${b.userId}">Afifa</span>
+                        <span class="balance-track" aria-hidden="true">
+                            <span class="balance-bar" th:classappend="${b.owed} ? 'owed' : (${b.owing} ? 'owing' : '')"
+                                  th:style="'width:' + ${overview.getBarWidth(b)} + '%'"></span>
+                        </span>
+                        <span class="balance-text">
+                            <span th:if="${b.owed}">is owed </span>
+                            <span th:if="${b.owing}">owes </span>
+                            <span th:if="${!b.owed and !b.owing}">settled </span>
+                            <strong th:if="${b.owed or b.owing}" th:text="'৳' + ${b.absoluteBalance}"></strong>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <h2>Payment history</h2>
+            <p class="meta" style="margin: 0 0 12px;">Payments the group has marked as paid.</p>
+            <div class="card">
+                <p th:if="${#lists.isEmpty(overview.settlements)}" class="hint">No payments yet.</p>
+                <table class="data-table" th:if="${!#lists.isEmpty(overview.settlements)}">
+                    <thead>
+                    <tr><th>Payment</th><th class="num">Amount</th><th>When</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${overview.settlements}">
+                        <td><span th:text="${s.fromUserId}"></span> paid <span th:text="${s.toUserId}"></span></td>
+                        <td class="num" th:text="'৳' + ${s.amount}"></td>
+                        <td th:text="${#temporals.format(s.settledAt, 'dd MMM, HH:mm')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+<script th:src="@{/js/debt-graph.js}"></script>
+</body>
+</html>

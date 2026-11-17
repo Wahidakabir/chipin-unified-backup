@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chipin — Itemized bills</title>
+    <link rel="stylesheet" th:href="@{/css/chipin-ui.css}">
+    <link rel="stylesheet" th:href="@{/css/theme-fun.css}">
+    <link rel="stylesheet" th:href="@{/css/bills.css}">
+</head>
+<body>
+<div class="container">
+    <header class="appbar">
+        <a class="brand" th:href="@{/debts(currentUser=${currentUser})}">Chipin</a>
+        <nav class="tabs" aria-label="Chipin features">
+            <a th:href="@{/debts(currentUser=${currentUser})}" class="tab">Debts</a>
+            <a th:href="@{/bills(currentUser=${currentUser})}" class="tab active">Itemized bills</a>
+            <a th:href="@{/roundup(currentUser=${currentUser})}" class="tab">Round-up</a>
+            <a th:href="@{/assets(currentUser=${currentUser})}" class="tab">Shared assets</a>
+            <details class="more">
+                <summary class="tab">Team features</summary>
+                <div class="more-menu">
+                    <a th:href="@{/voting(currentUser=${currentUser})}">Expense voting</a>
+                    <a th:href="@{/emergency(currentUser=${currentUser})}">Emergency fund</a>
+                    <a th:href="@{/health-score(currentUser=${currentUser})}">Health score</a>
+                    <a th:href="@{/recurring(currentUser=${currentUser})}">Recurring bills</a>
+                    <a th:href="@{/receipts(currentUser=${currentUser})}">Receipt vault</a>
+                </div>
+            </details>
+        </nav>
+        <form method="get" th:action="@{/bills}" class="user-switcher">
+            <label for="currentUser">Acting as</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                        th:selected="${m == currentUser}"></option>
+            </select>
+        </form>
+    </header>
+
+    <div class="page-head">
+        <h1>Itemized bills</h1>
+        <p class="subtitle">Pick who shared each item. Tax, service charge, tip and discount are split in proportion to what each person ordered.</p>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- Step 1: create a bill -->
+    <section class="card">
+        <h2>Start a new bill</h2>
+        <form th:action="@{/bills/create}" method="post" class="form-grid">
+            <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+
+            <div class="form-group">
+                <label>Bill Title</label>
+                <input type="text" name="title" placeholder="e.g., Dinner at Kacchi Bhai" required/>
+            </div>
+
+            <div class="form-group">
+                <label>Paid By</label>
+                <select name="paidByUserId">
+                    <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                            th:selected="${m == currentUser}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Bill Date</label>
+                <input type="date" name="billDate" th:value="${today}"/>
+            </div>
+
+            <div class="form-group">
+                <label>Tax / VAT (BDT)</label>
+                <input type="number" step="0.01" min="0" name="tax" placeholder="0"/>
+            </div>
+
+            <div class="form-group">
+                <label>Service Charge (BDT)</label>
+                <input type="number" step="0.01" min="0" name="serviceCharge" placeholder="0"/>
+            </div>
+
+            <div class="form-group">
+                <label>Tip (BDT)</label>
+                <input type="number" step="0.01" min="0" name="tip" placeholder="0"/>
+            </div>
+
+            <div class="form-group">
+                <label>Discount (BDT)</label>
+                <input type="number" step="0.01" min="0" name="discount" placeholder="0"/>
+            </div>
+
+            <div class="form-group form-action">
+                <button type="submit" class="btn btn-primary">Create bill</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Step 2 and 3: add items, review the split, finalize -->
+    <section>
+        <h2 class="section-title">Group bills</h2>
+        <div th:if="${#lists.isEmpty(bills)}" class="card">
+            No bills yet. Start one above and add what everyone ordered.
+        </div>
+
+        <div th:each="v : ${bills}" class="card">
+            <div class="bill-header">
+                <div>
+                    <h3 th:text="${v.bill.title}"></h3>
+                    <span class="meta">
+                        Paid by <strong th:text="${v.bill.paidByUserId}"></strong>
+                        • <span th:text="${v.bill.billDate}"></span>
+                    </span>
+                </div>
+                <div class="amount-badge">
+                    <span class="amount" th:text="'৳' + ${v.grandTotal}"></span>
+                    <span class="status-badge"
+                          th:classappend="${v.draft} ? 'status-draft' : 'status-finalized'"
+                          th:text="${v.bill.status}"></span>
+                </div>
+            </div>
+
+            <!-- Items -->
+            <table class="data-table" th:if="${!#lists.isEmpty(v.items)}">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Shared By</th>
+                    <th class="num">Amount</th>
+                    <th th:if="${v.draft}"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="iv : ${v.items}">
+                    <td th:text="${iv.item.name}"></td>
+                    <td>
+                        <span th:each="u : ${iv.assignees}" class="tag" th:text="${u}"></span>
+                    </td>
+                    <td class="num" th:text="'৳' + ${iv.item.amount}"></td>
+                    <td th:if="${v.draft}" class="num">
+                        <form th:action="@{/bills/items/{itemId}/delete(itemId=${iv.item.id})}" method="post">
+                            <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                            <button type="submit" class="btn btn-small btn-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <p th:if="${#lists.isEmpty(v.items)}" class="hint">No items yet. Add the first item below.</p>
+
+            <!-- Add item (draft only) -->
+            <form th:if="${v.draft}" th:action="@{/bills/{id}/items(id=${v.bill.id})}" method="post" class="item-form">
+                <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                <input type="text" name="name" placeholder="Item name (e.g., Pizza)" required/>
+                <input type="number" step="0.01" min="0.01" name="amount" placeholder="Amount" required/>
+                <div class="member-checks">
+                    <span class="meta">Shared by:</span>
+                    <label th:each="m : ${members}" class="check">
+                        <input type="checkbox" name="assignees" th:value="${m}"/>
+                        <span th:text="${m}"></span>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Add item</button>
+            </form>
+
+            <!-- Tax, tip, discount -->
+            <form th:if="${v.draft}" th:action="@{/bills/{id}/extras(id=${v.bill.id})}" method="post" class="extras-form">
+                <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                <label>Tax <input type="number" step="0.01" min="0" name="tax" th:value="${v.bill.tax}"/></label>
+                <label>Service <input type="number" step="0.01" min="0" name="serviceCharge" th:value="${v.bill.serviceCharge}"/></label>
+                <label>Tip <input type="number" step="0.01" min="0" name="tip" th:value="${v.bill.tip}"/></label>
+                <label>Discount <input type="number" step="0.01" min="0" name="discount" th:value="${v.bill.discount}"/></label>
+                <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+
+            <div class="summary-row">
+                <span>Items subtotal: <strong th:text="'৳' + ${v.itemsSubtotal}"></strong></span>
+                <span>Tax: <strong th:text="'৳' + ${v.bill.tax}"></strong></span>
+                <span>Service: <strong th:text="'৳' + ${v.bill.serviceCharge}"></strong></span>
+                <span>Tip: <strong th:text="'৳' + ${v.bill.tip}"></strong></span>
+                <span>Discount: <strong th:text="'−৳' + ${v.bill.discount}"></strong></span>
+            </div>
+
+            <!-- Who owes what -->
+            <div th:if="${!#lists.isEmpty(v.shares)}">
+                <h4 th:text="${v.draft} ? 'Split preview' : 'Final split'"></h4>
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th class="num">Items Subtotal</th>
+                        <th class="num">Share of Tax, Tip &amp; Discount</th>
+                        <th class="num">Total Share</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${v.shares}">
+                        <td>
+                            <span th:text="${s.userId}"></span>
+                            <span th:if="${s.userId == v.bill.paidByUserId}" class="tag tag-payer">paid the bill</span>
+                        </td>
+                        <td class="num" th:text="'৳' + ${s.subtotal}"></td>
+                        <td class="num" th:text="'৳' + ${s.extrasShare}"></td>
+                        <td class="num"><strong th:text="'৳' + ${s.total}"></strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${v.draft}" class="bill-actions">
+                <form th:action="@{/bills/{id}/finalize(id=${v.bill.id})}" method="post">
+                    <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                    <button type="submit" class="btn btn-verify">Finalize and log to ledger</button>
+                </form>
+                <form th:action="@{/bills/{id}/delete(id=${v.bill.id})}" method="post">
+                    <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                    <button type="submit" class="btn btn-danger">Delete draft</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chipin — Emergency Expense & Instant Contribution</title>
+    <link rel="stylesheet" th:href="@{/css/emergency.css}">
+</head>
+<body>
+<div class="container">
+    <div class="nav-tabs">
+        <a th:href="@{/voting(currentUser=${currentUser})}" class="nav-link">Feature 6: Expense Voting</a>
+        <a th:href="@{/emergency(currentUser=${currentUser})}" class="nav-link active">Feature 7: Emergency Fund</a>
+    </div>
+
+    <header class="top-bar">
+        <div>
+            <h1>Chipin — Emergency Expense & Instant Contribution</h1>
+            <p class="subtitle">Urgent expenses bypass standard voting for immediate pooled funding.</p>
+        </div>
+
+        <form method="get" th:action="@{/emergency}" class="user-switcher">
+            <label for="currentUser">Acting as:</label>
+            <select id="currentUser" name="currentUser" onchange="this.form.submit()">
+                <option th:each="m : ${members}" th:value="${m}" th:text="${m}"
+                        th:selected="${m == currentUser}"></option>
+            </select>
+        </form>
+    </header>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- Raise Emergency Request -->
+    <section class="card emergency-border">
+        <h2>Raise an Urgent Emergency Expense</h2>
+        <form th:action="@{/emergency/create}" th:object="${newEmergency}" method="post" class="form-grid">
+            <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+
+            <div class="form-group">
+                <label>Emergency Title</label>
+                <input type="text" th:field="*{title}" placeholder="e.g., Urgent Hospital Deposit" required/>
+                <span class="error-text" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Target Amount (BDT)</label>
+                <input type="number" step="0.01" th:field="*{targetAmount}" placeholder="8000" required/>
+                <span class="error-text" th:if="${#fields.hasErrors('targetAmount')}" th:errors="*{targetAmount}"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Urgency Level</label>
+                <select th:field="*{urgencyLevel}">
+                    <option value="CRITICAL">CRITICAL (Immediate)</option>
+                    <option value="HIGH">HIGH (Within 2 Hours)</option>
+                    <option value="MODERATE">MODERATE (Same Day)</option>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Emergency Context / Details</label>
+                <input type="text" th:field="*{reason}" placeholder="Explain why instant funding is needed"/>
+            </div>
+
+            <button type="submit" class="btn btn-emergency">Broadcast Emergency Request</button>
+        </form>
+    </section>
+
+    <!-- Active & Fulfilled Emergency Requests -->
+    <section>
+        <h2>Group Emergency Funds</h2>
+        <div th:if="${#lists.isEmpty(emergencies)}" class="card empty-state">
+            No emergency requests active right now.
+        </div>
+
+        <div th:each="em : ${emergencies}" class="card">
+            <div class="proposal-header">
+                <div>
+                    <span class="urgency-pill"
+                          th:classappend="${em.urgencyLevel == 'CRITICAL'} ? 'urgency-critical' : 'urgency-high'"
+                          th:text="${em.urgencyLevel}"></span>
+                    <h3 style="margin-top: 6px;" th:text="${em.title}"></h3>
+                    <span class="meta">
+                        Requested by <strong th:text="${em.requestedByUserId}"></strong>
+                        • Voting Bypassed
+                    </span>
+                </div>
+                <div class="amount-badge">
+                    <span class="amount" th:text="'৳' + ${em.collectedAmount} + ' / ৳' + ${em.targetAmount}"></span>
+                    <span class="status-badge"
+                          th:classappend="${em.status == 'FULFILLED'} ? 'status-approved' : 'status-pending'"
+                          th:text="${em.status}"></span>
+                </div>
+            </div>
+
+            <p th:if="${em.reason != null and !em.reason.isEmpty()}" th:text="${em.reason}"></p>
+
+            <!-- Live Progress Bar -->
+            <div class="progress-wrapper">
+                <div class="progress-bar">
+                    <div class="progress-fill" th:style="'width:' + ${em.progressPercentage} + '%'"></div>
+                </div>
+                <span class="meta" th:text="${em.progressPercentage} + '% funded (৳' + ${em.remainingAmount} + ' remaining)'"></span>
+            </div>
+
+            <!-- Instant Contribution Form -->
+            <div th:if="${em.status == 'ACTIVE'}" class="contribute-box">
+                <form th:action="@{/emergency/{id}/contribute(id=${em.id})}" method="post" class="contribute-form">
+                    <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                    <input type="number" step="0.01" name="amount" placeholder="Enter amount (BDT)" required/>
+                    <button type="submit" class="btn btn-yes" th:text="'Chip In Now as ' + ${currentUser}"></button>
+                </form>
+
+                <form th:if="${em.remainingAmount > 0}" th:action="@{/emergency/{id}/contribute(id=${em.id})}" method="post" style="display:inline;">
+                    <input type="hidden" name="currentUser" th:value="${currentUser}"/>
+                    <input type="hidden" name="amount" th:value="${em.remainingAmount}"/>
+                    <button type="submit" class="btn btn-primary"
+                            th:text="'Cover Remaining (৳' + ${em.remainingAmount} + ')'"></button>
+                </form>
+            </div>
+
+            <!-- Contribution Log -->
+            <div class="vote-summary">
+                <strong>Instant Contributions:</strong>
+                <span th:if="${#lists.isEmpty(contributionsMap[em.id])}" class="meta">No contributions yet.</span>
+                <span th:each="c : ${contributionsMap[em.id]}" class="tag"
+                      th:text="${c.contributorUserId} + ': ৳' + ${c.amount}"></span>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
