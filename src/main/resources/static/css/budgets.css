@@ -1,0 +1,235 @@
+/* Feature 11: Group Budget Management Styles */
+
+.budget-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.budget-switcher-box form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.budget-switcher-box select {
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: var(--font-display);
+}
+
+.text-danger {
+  color: var(--bad-ink) !important;
+}
+
+/* Category Grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.category-card {
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-overrun {
+  border-color: var(--bad-ink);
+  background: var(--bad-wash);
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-numbers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.fill-normal {
+  background: var(--brand);
+}
+
+.fill-warning {
+  background: var(--warn-ink);
+}
+
+.fill-danger {
+  background: var(--bad-ink);
+}
+
+.category-footer {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-active {
+  background: var(--ok-wash);
+  color: var(--ok-ink);
+}
+
+.badge-exceeded {
+  background: var(--bad-wash);
+  color: var(--bad-ink);
+}
+
+.badge-archived {
+  background: var(--line);
+  color: var(--ink-3);
+}
+
+.badge-normal {
+  background: var(--brand-wash);
+  color: var(--brand);
+}
+
+/* Sub-form and Table */
+.card-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.sub-form-box {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--line);
+}
+
+.sub-form-box h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.btn-col {
+  display: flex;
+  align-items: flex-end;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.table th, .table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.table th {
+  color: var(--ink-3);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.row-voided td {
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+
+.void-form {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.input-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  max-width: 130px;
+}
+
+.archive-box {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.empty-state {
+  padding: 24px 0;
+  color: var(--ink-3);
+  font-style: italic;
+}
